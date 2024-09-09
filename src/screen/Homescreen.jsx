@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View, Appearance, Dimensions } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View, Appearance, Dimensions, Alert } from 'react-native';
 import { colors } from '../colors';
 import { useNavigation } from '@react-navigation/native';
 
@@ -10,21 +10,26 @@ const Homescreen = () => {
   const [theme, setTheme] = useState(Appearance.getColorScheme());
 
   useEffect(() => {
+    // Listener to detect theme changes
     const themeListener = Appearance.addChangeListener(({ colorScheme }) => {
       setTheme(colorScheme);
     });
 
+    // Cleanup listener on component unmount
     return () => themeListener.remove();
   }, []);
 
+  // Function to handle login button press
   const handleLogin = () => {
     navigation.navigate("LOGIN");
   };
 
+  // Function to handle signup button press
   const handleSignup = () => {
     navigation.navigate("SIGNIN");
   };
 
+  // Determine if dark mode is active
   const isDarkMode = theme === 'dark';
   const currentTextColor = isDarkMode ? colors.darkText : colors.black;
   const currentBackgroundColor = isDarkMode ? colors.darkBackground : colors.white;
@@ -35,27 +40,30 @@ const Homescreen = () => {
       <Image source={require("../images/Frame8.png")} style={styles.logo} />
       <Image source={require("../images/idclogo.png")} style={styles.bannerImage} />
 
-      <Text className="text-white" style={[styles.title,  { color: highlightTextColor,  }]}>
+      {/* Main title */}
+      <Text style={[styles.title, { color: highlightTextColor }]}>
         INNOVATION DEVELOPMENT COUNCIL
       </Text>
+
+      {/* Subtitle with highlighted text */}
       <Text style={[styles.subTitle, { color: currentTextColor }]}>
         Build skills for today, tomorrow, and beyond.
+        {/* Ensure highlighted text is wrapped in a Text component */}
         <Text style={[styles.highlightText, { color: highlightTextColor }]}>
           Education to future-proof your career
         </Text>
       </Text>
 
       <View style={styles.buttonContainer}>
+        {/* Login button */}
         <TouchableOpacity
-          style={[
-            styles.loginButtonWrapper,
-            { backgroundColor: colors.primary },
-          ]}
+          style={[styles.loginButtonWrapper, { backgroundColor: colors.primary }]}
           onPress={handleLogin}
         >
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
+        {/* Signup button */}
         <TouchableOpacity
           style={styles.loginButtonWrapper}
           onPress={handleSignup}
@@ -90,7 +98,7 @@ const styles = StyleSheet.create({
   },
   highlightText: {
     color: colors.red,
-     // This will be overridden in code based on theme
+    // This will be overridden in code based on theme
   },
   title: {
     fontSize: 32,

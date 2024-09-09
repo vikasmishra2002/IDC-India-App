@@ -1,279 +1,257 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, Pressable, Appearance, ScrollView } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Appearance, Alert, Animated, Easing } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { colors } from '../colors'; // Ensure this file exists and is correctly referenced
+import { fonts } from './fonts';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import { useNavigation } from '@react-navigation/native';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import { useDispatch } from 'react-redux';
+import { login } from '../Redux/Reducers/authSlice';
+import { withoutAuthAxios } from '../services/config';
+import Toast from 'react-native-toast-message';
 
-const Payments = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [theme, setTheme] = useState(Appearance.getColorScheme());
-  const [activeIcon, setActiveIcon] = useState('payments'); // Set 'payments' as active icon initially
+const Loginscreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const [secureEntry, setSecureEntry] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [theme, setTheme] = useState(Appearance.getColorScheme());
+
+  const scrollAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const themeListener = Appearance.addChangeListener(({ colorScheme }) => {
+    const listener = Appearance.addChangeListener(({ colorScheme }) => {
       setTheme(colorScheme);
     });
 
-    return () => themeListener.remove();
+    startScrolling();
+
+    return () => listener.remove();
   }, []);
 
-  const handleLogout = () => {
-    setModalVisible(false);
-    navigation.navigate('LOGIN');
+  const startScrolling = () => {
+    scrollAnim.setValue(0);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scrollAnim, {
+          toValue: -500, // Adjust based on text width
+          duration: 5000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.delay(1000),
+      ])
+    ).start();
   };
 
-  const handleHome = () => {
-    setModalVisible(false);
-    navigation.navigate('HOMESCREENMAIN');
+  const handleGoBack = () => {
+    navigation.goBack();
   };
 
-  const handleIconPress = (iconName) => {
-    setActiveIcon(iconName);
-    switch (iconName) {
-      case 'batches':
-        navigation.navigate('BATCHES');
-        break;
-      case 'courses':
-        navigation.navigate('COURSES');
-        break;
-      case 'performance':
-        navigation.navigate('PERFORMANCE');
-        break;
-      case 'payments':
-        navigation.navigate('PAYMENTS');
-        break;
-      case 'assignments':
-        navigation.navigate('ASSIGNMENTS');
-        break;
-      case 'info':
-      default:
-        navigation.navigate('DASHBOARD');
-        break;
+  const handleSignup = () => {
+    navigation.navigate('SIGNIN');
+  };
+
+  const handleLogin = async () => {
+    try {
+      const response = await withoutAuthAxios().post('/auth/login', {
+        email,
+        password,
+      });
+
+      console.log(response, "Login response");
+
+      const { user, token } = response.data;
+      dispatch(login({ user, accessToken: token }));
+
+      Toast.show({
+        type: 'success',
+        position: 'bottom',
+        text1: 'Login Successful',
+        text2: 'Welcome back!',
+      });
+
+      navigation.navigate('HOMESCREENMAIN');
+    } catch (error) {
+      console.log(error, "Login error");
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Login Failed',
+        text2: 'Please check your credentials.',
+      });
     }
   };
 
   const currentTextColor = theme === 'dark' ? '#fff' : '#000';
-  const currentBackgroundColor = theme === 'dark' ? '#121212' : '#f8f8f8';
-  const activeColor = '#007AFF'; // Blue color for active icons
+  const marqueeBgColor = theme === 'dark' ? '#ff0000' : '#ff0000'; // Red background in both modes
+  const marqueeTextColor = theme === 'dark' ? '#fff' : '#fff'; // White text in both modes
 
   return (
-    <View style={[styles.container, { backgroundColor: currentBackgroundColor }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: currentBackgroundColor }]}>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Image 
-            source={require('../images/avdesh.png')} 
-            style={styles.profileImage} 
+    <View style={[styles.container, { backgroundColor: theme === 'dark' ? '#121212' : '#f8f8f8' }]}>
+      <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
+        <Ionicons name="arrow-back-outline" color={colors.primary} size={25} />
+      </TouchableOpacity>
+
+      {/* Marquee Container */}
+      <View style={[styles.marqueeContainer, { backgroundColor: marqueeBgColor }]}>
+        <Animated.Text
+          style={[
+            styles.marqueeText,
+            { color: marqueeTextColor, transform: [{ translateX: scrollAnim }] },
+          ]}
+        >
+          Hey, Welcome Back, IDC User
+        </Animated.Text>
+      </View>
+
+      <View style={styles.formContainer}>
+        <View style={styles.inputContainer}>
+          <Ionicons name="mail-outline" size={30} color={colors.secondary} />
+          <TextInput
+            style={[styles.textInput, { color: currentTextColor }]}
+            placeholder="Enter your email"
+            placeholderTextColor={theme === 'dark' ? '#ccc' : '#666'}
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
           />
-        </TouchableOpacity>
-        <Image 
-          source={require('../images/idclogo.png')}
-          style={styles.companyLogo}
-        />
-        <View style={styles.headerIcons}>
-          <TouchableOpacity>
-            <Ionicons name="search" size={24} color={currentTextColor} />
+        </View>
+        <View style={styles.inputContainer}>
+          <SimpleLineIcons name="lock" size={30} color={colors.secondary} />
+          <TextInput
+            style={[styles.textInput, { color: currentTextColor }]}
+            placeholder="Enter your password"
+            placeholderTextColor={theme === 'dark' ? '#ccc' : '#666'}
+            secureTextEntry={secureEntry}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setSecureEntry(!secureEntry)}>
+            <SimpleLineIcons name={secureEntry ? 'eye' : 'eye-off'} size={20} color={colors.secondary} />
           </TouchableOpacity>
-          <TouchableOpacity style={{ marginLeft: 15 }}>
-            <Ionicons name="notifications-outline" size={24} color={currentTextColor} />
+        </View>
+        <TouchableOpacity>
+          <Text style={[styles.forgotPasswordText, { color: currentTextColor }]}>Forgot Password?</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.loginButtonWrapper} onPress={handleLogin}>
+          <Text style={styles.loginText}>Login</Text>
+        </TouchableOpacity>
+        <Text style={[styles.continueText, { color: currentTextColor }]}>or continue with</Text>
+        <TouchableOpacity style={styles.googleButtonContainer}>
+          <Image source={require('../images/Google.png')} style={styles.googleImage} />
+          <Text style={styles.googleText}>Google</Text>
+        </TouchableOpacity>
+        <View style={styles.footerContainer}>
+          <Text style={[styles.accountText, { color: currentTextColor }]}>Don’t have an account?</Text>
+          <TouchableOpacity onPress={handleSignup}>
+            <Text style={[styles.signupText, { color: colors.primary }]}>Sign up</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Profile Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <Pressable style={styles.centeredView} onPress={() => setModalVisible(false)}>
-          <View style={[styles.modalView, { backgroundColor: theme === 'dark' ? '#333' : '#fff' }]}>
-            <TouchableOpacity style={styles.modalButton} onPress={handleHome}>
-              <Text style={[styles.modalText, { color: theme === 'dark' ? '#fff' : '#000' }]}>
-                Home
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={handleLogout}>
-              <Text style={[styles.modalText, { color: theme === 'dark' ? '#fff' : '#000' }]}>
-                Logout
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      </Modal>
-
-      {/* Main Content */}
-      <View style={styles.mainContent}>
-        <Text style={{ color: currentTextColor }}>Payments Content Goes Here</Text>
-      </View>
-
-      {/* Footer */}
-      <View style={[styles.footer, { backgroundColor: currentBackgroundColor }]}>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={styles.footerContainer}
-        >
-          <TouchableOpacity 
-            style={styles.footerItem} 
-            onPress={() => handleIconPress('info')}
-          >
-            <SimpleLineIcons 
-              name="info" 
-              size={24} 
-              color={activeIcon === 'info' ? activeColor : currentTextColor} 
-            />
-            <Text style={[styles.footerText, { color: currentTextColor }]}>INFO</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.footerItem} 
-            onPress={() => handleIconPress('batches')}
-          >
-            <SimpleLineIcons 
-              name="book-open" 
-              size={24} 
-              color={activeIcon === 'batches' ? activeColor : currentTextColor} 
-            />
-            <Text style={[styles.footerText, { color: currentTextColor }]}>BATCHES</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.footerItem} 
-            onPress={() => handleIconPress('courses')}
-          >
-            <Ionicons 
-              name="school-outline" 
-              size={24} 
-              color={activeIcon === 'courses' ? activeColor : currentTextColor} 
-            />
-            <Text style={[styles.footerText, { color: currentTextColor }]}>COURSES</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.footerItem} 
-            onPress={() => handleIconPress('performance')}
-          >
-            <Ionicons 
-              name="bar-chart-outline" 
-              size={24} 
-              color={activeIcon === 'performance' ? activeColor : currentTextColor} 
-            />
-            <Text style={[styles.footerText, { color: currentTextColor }]}>PERFORMANCE</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.footerItem} 
-            onPress={() => handleIconPress('payments')}
-          >
-            <Ionicons 
-              name="wallet-outline" 
-              size={24} 
-              color={activeIcon === 'payments' ? activeColor : currentTextColor} 
-            />
-            <Text style={[styles.footerText, { color: currentTextColor }]}>PAYMENTS</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.footerItem} 
-            onPress={() => handleIconPress('assignments')}
-          >
-            <Ionicons 
-              name="document-text-outline" 
-              size={24} 
-              color={activeIcon === 'assignments' ? activeColor : currentTextColor} 
-            />
-            <Text style={[styles.footerText, { color: currentTextColor }]}>ASSIGNMENTS</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.footerItem} 
-            onPress={() => handleIconPress('more')}
-          >
-            <Ionicons 
-              name="ellipsis-horizontal" 
-              size={24} 
-              color={activeIcon === 'more' ? activeColor : currentTextColor} 
-            />
-            <Text style={[styles.footerText, { color: currentTextColor }]}>MORE</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+      <Toast ref={(ref) => Toast.setRef(ref)} />
     </View>
   );
 };
 
-export default Payments;
+export default Loginscreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    padding: 20,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    elevation: 4,
-  },
-  profileImage: {
+  backButtonWrapper: {
+    height: 40,
     width: 40,
-    height: 40,
+    backgroundColor: colors.gray,
     borderRadius: 20,
-    backgroundColor: '#ccc',
-  },
-  companyLogo: {
-    width: 100,
-    height: 40,
-    resizeMode: 'contain',
-  },
-  headerIcons: {
-    flexDirection: 'row',
-  },
-  mainContent: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  marqueeContainer: {
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+    overflow: 'hidden', // Ensure text is clipped properly
+  },
+  marqueeText: {
+    fontSize: 24,
+    fontFamily: fonts.Bold,
+  },
+  formContainer: {
+    marginTop: 40,
+  },
+  inputContainer: {
+    borderWidth: 1,
+    borderColor: colors.secondary,
+    borderRadius: 100,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 2,
+    marginVertical: 10,
+  },
+  textInput: {
+    flex: 1,
+    paddingHorizontal: 10,
+    fontFamily: fonts.Light,
+  },
+  forgotPasswordText: {
+    textAlign: 'right',
+    fontFamily: fonts.SemiBold,
+    marginVertical: 10,
+  },
+  loginButtonWrapper: {
+    backgroundColor: colors.primary,
+    borderRadius: 100,
+    marginTop: 20,
+  },
+  loginText: {
+    color: colors.white,
+    fontSize: 20,
+    fontFamily: fonts.SemiBold,
+    textAlign: 'center',
+    padding: 10,
+  },
+  continueText: {
+    textAlign: 'center',
+    marginVertical: 20,
+    fontSize: 14,
+    fontFamily: fonts.Regular,
+  },
+  googleButtonContainer: {
+    flexDirection: 'row',
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    gap: 10,
+  },
+  googleImage: {
+    height: 20,
+    width: 20,
+  },
+  googleText: {
+    fontSize: 20,
+    fontFamily: fonts.SemiBold,
   },
   footerContainer: {
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-  },
-  footer: {
-    borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: 20,
+    gap: 5,
   },
-  footerItem: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100, // Width for each icon item
+  accountText: {
+    fontFamily: fonts.Regular,
   },
-  footerText: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalView: {
-    width: 250,
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalButton: {
-    width: '100%',
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 16,
+  signupText: {
+    fontFamily: fonts.Bold,
   },
 });
