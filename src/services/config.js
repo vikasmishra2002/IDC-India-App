@@ -3,7 +3,7 @@ import axios from 'axios';
 import { store } from '../Redux/store';
 
 
-REACT_APP_BASEURL="http://10.0.2.2:5000/api/v1"
+REACT_APP_BASEURL="https://idc-india-update.onrender.com/api/v1"
 console.log(REACT_APP_BASEURL,"REACT_APP_BASEURLREACT_APP_BASEURLREACT_APP_BASEURL")
 
 

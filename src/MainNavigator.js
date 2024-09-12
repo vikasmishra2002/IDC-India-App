@@ -11,7 +11,8 @@ import Dashboard from './screen/Dashboard';
 import Payments from './screen/Payments';
 import Otpverification from './screen/Otpverification';
 import Forgetpassword from './screen/Forgetpassword';
-
+import CourseDetail from './screen/CourseDetail'
+import CartPage from './screen/CartPage';
 const Stack = createNativeStackNavigator();
 
 const MainNavigator = () => {
@@ -30,7 +31,7 @@ const MainNavigator = () => {
   }, []);
 
   if (!isLoaded) {
-    // You can return a loading spinner or null here while the state is loading
+    
     return null; // Or a loading component
   }
 
@@ -49,6 +50,8 @@ const MainNavigator = () => {
         <Stack.Screen name="COURSES" component={Coursesscreen} />
         <Stack.Screen name="DASHBOARD" component={Dashboard} />
         <Stack.Screen name="PAYMENTS" component={Payments} />
+        <Stack.Screen name="CourseDetail" component={CourseDetail}/>
+        <Stack.Screen name="cartpage" component={CartPage}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

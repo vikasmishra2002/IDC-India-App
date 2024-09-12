@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View, Appearance, Dimensions, Alert } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View, Appearance, Dimensions } from 'react-native';
 import { colors } from '../colors';
 import { useNavigation } from '@react-navigation/native';
 
@@ -19,6 +19,12 @@ const Homescreen = () => {
     return () => themeListener.remove();
   }, []);
 
+  // Determine if dark mode is active
+  const isDarkMode = theme === 'dark';
+  const currentTextColor = isDarkMode ? colors.darkText : colors.black;
+  const currentBackgroundColor = isDarkMode ? colors.darkBackground : colors.white;
+  const highlightTextColor = isDarkMode ? colors.primary : colors.red;
+
   // Function to handle login button press
   const handleLogin = () => {
     navigation.navigate("LOGIN");
@@ -28,12 +34,6 @@ const Homescreen = () => {
   const handleSignup = () => {
     navigation.navigate("SIGNIN");
   };
-
-  // Determine if dark mode is active
-  const isDarkMode = theme === 'dark';
-  const currentTextColor = isDarkMode ? colors.darkText : colors.black;
-  const currentBackgroundColor = isDarkMode ? colors.darkBackground : colors.white;
-  const highlightTextColor = isDarkMode ? colors.primary : colors.red;
 
   return (
     <View style={[styles.container, { backgroundColor: currentBackgroundColor }]}>
@@ -48,7 +48,6 @@ const Homescreen = () => {
       {/* Subtitle with highlighted text */}
       <Text style={[styles.subTitle, { color: currentTextColor }]}>
         Build skills for today, tomorrow, and beyond.
-        {/* Ensure highlighted text is wrapped in a Text component */}
         <Text style={[styles.highlightText, { color: highlightTextColor }]}>
           Education to future-proof your career
         </Text>
@@ -57,18 +56,18 @@ const Homescreen = () => {
       <View style={styles.buttonContainer}>
         {/* Login button */}
         <TouchableOpacity
-          style={[styles.loginButtonWrapper, { backgroundColor: colors.primary }]}
+          style={[styles.button, styles.loginButton, { backgroundColor: colors.primary }]}
           onPress={handleLogin}
         >
-          <Text style={styles.loginButtonText}>Login</Text>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
         {/* Signup button */}
         <TouchableOpacity
-          style={styles.loginButtonWrapper}
+          style={[styles.button, styles.signupButton, { borderColor: highlightTextColor }]}
           onPress={handleSignup}
         >
-          <Text style={[styles.signupButtonText, { color: currentTextColor }]}>Sign-up</Text>
+          <Text style={[styles.buttonText, { color: highlightTextColor }]}>Sign-up</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -80,57 +79,60 @@ export default Homescreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   logo: {
-    height: height * 0.05,
+    height: height * 0.06,
     width: width * 0.4,
-    marginVertical: height * 0.03,
+    marginBottom: height * 0.03,
     resizeMode: 'contain',
   },
   bannerImage: {
-    height: height * 0.3,
-    width: width * 0.9,
+    height: height * 0.25,
+    width: width * 0.8,
     resizeMode: 'contain',
-    marginTop: height * 0.03,
-    marginBottom: height * 0.1,
-  },
-  highlightText: {
-    color: colors.red,
-    // This will be overridden in code based on theme
+    marginBottom: height * 0.05,
   },
   title: {
-    fontSize: 32,
+    fontSize: height * 0.035,
     textAlign: 'center',
-    marginTop: height * 0.04,
+    fontWeight: 'bold',
+    marginBottom: height * 0.02,
   },
   subTitle: {
-    fontSize: 18,
-    paddingHorizontal: 20,
+    fontSize: height * 0.02,
+    paddingHorizontal: width * 0.1,
     textAlign: 'center',
-    marginVertical: height * 0.02,
+    marginBottom: height * 0.04,
+    lineHeight: height * 0.03,
+  },
+  highlightText: {
+    fontWeight: 'bold',
   },
   buttonContainer: {
-    marginTop: height * 0.02,
     flexDirection: 'row',
-    borderWidth: 2,
-    borderColor: colors.primary,
+    justifyContent: 'space-between',
     width: '80%',
-    height: height * 0.08,
-    borderRadius: 100,
+    marginTop: height * 0.02,
   },
-  loginButtonWrapper: {
-    justifyContent: 'center',
+  button: {
+    width: '45%',
+    paddingVertical: height * 0.015,
     alignItems: 'center',
-    width: '50%',
-    borderRadius: 98,
+    borderRadius: 50,
+    borderWidth: 2,
   },
-  loginButtonText: {
+  loginButton: {
+    backgroundColor: colors.primary,
+  },
+  signupButton: {
+    borderColor: colors.red,
+  },
+  buttonText: {
+    fontSize: height * 0.02,
     color: colors.white,
-    fontSize: 18,
-  },
-  signupButtonText: {
-    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

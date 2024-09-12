@@ -26,9 +26,9 @@ const Footer = ({ activeTab, onTabPress = () => {} }) => { // Provide default fu
         <Ionicons name="book-outline" size={24} color={iconColor('COURSES')} style={glowingStyle('COURSES')} />
         <Text style={[styles.footerButtonText, { color: iconColor('COURSES') }]}>All Courses</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.footerButton} onPress={() => { navigation.navigate('PAYMENTS'); onTabPress('PAYMENTS'); }}>
-        <Ionicons name="chatbox-outline" size={24} color={iconColor('PAYMENTS')} style={glowingStyle('PAYMENTS')} />
-        <Text style={[styles.footerButtonText, { color: iconColor('PAYMENTS') }]}>Keep Learning</Text>
+      <TouchableOpacity style={styles.footerButton} onPress={() => { navigation.navigate('CourseDetail'); onTabPress('CourseDetail'); }}>
+        <Ionicons name="chatbox-outline" size={24} color={iconColor('CourseDetail')} style={glowingStyle('CourseDetail')} />
+        <Text style={[styles.footerButtonText, { color: iconColor('CourseDetail') }]}>Keep Learning</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.footerButton} onPress={() => { navigation.navigate('DASHBOARD'); onTabPress('DASHBOARD'); }}>
         <Ionicons name="person-outline" size={24} color={iconColor('DASHBOARD')} style={glowingStyle('DASHBOARD')} />

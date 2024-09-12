@@ -16,7 +16,7 @@ import {
 const persistConfig = {
   key: 'idc-india',
   storage: AsyncStorage,
-  whitelist: ['auth'],
+  whitelist: ['auth','cart'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

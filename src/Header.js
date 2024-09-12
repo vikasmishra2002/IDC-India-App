@@ -3,16 +3,15 @@ import { View, Image, TouchableOpacity, StyleSheet, Text, Modal, Pressable } fro
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Appearance } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from './Redux/Reducers/authSlice';
 
 const Header = ({ profileImage }) => {
-  console.log(profileImage, "profileImageprofileImage");
-
   const [modalVisible, setModalVisible] = useState(false);
   const [theme, setTheme] = useState(Appearance.getColorScheme());
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const cartCount = useSelector(state => state.cart.items.length); // Get cart count from Redux
 
   useEffect(() => {
     const themeListener = Appearance.addChangeListener(({ colorScheme }) => {
@@ -24,8 +23,12 @@ const Header = ({ profileImage }) => {
 
   const handleLogout = () => {
     setModalVisible(false);
-    dispatch(logout()); // Dispatch the logout action to clear state
-    navigation.navigate('LOGIN'); // Navigate to the login screen
+    dispatch(logout()); // Dispatch the logout action
+    // Reset navigation stack to prevent going back to protected screens
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LOGIN' }],
+    });
   };
 
   const currentBackgroundColor = theme === 'dark' ? '#121212' : '#fff';
@@ -35,21 +38,24 @@ const Header = ({ profileImage }) => {
     <View style={styles.header}>
       <TouchableOpacity onPress={() => setModalVisible(true)}>
         <Image
-          source={profileImage ? { uri: profileImage } : require('./images/avdesh.png')}
+          source={profileImage ? { uri: profileImage } : require('./images/arya.png')}
           style={styles.profileImage}
         />
       </TouchableOpacity>
-      <Image
-        source={require('./images/idclogo.png')}
-        style={styles.companyLogo}
-      />
+
+      <Image source={require('./images/idclogo.png')} style={styles.companyLogo} />
+
       <View style={styles.headerIcons}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('CartPage')}>
           <Ionicons name="cart-outline" size={24} color="#333" />
+          {cartCount > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartCountText}>{cartCount}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
-      {/* Profile Modal */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -71,27 +77,17 @@ const Header = ({ profileImage }) => {
 };
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 8,
-    backgroundColor: '#f8f8f8',
-    elevation: 3,
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  companyLogo: {
-    width: 60,
-    height: 60,
-    resizeMode: 'contain',
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  header: { flexDirection: 'row', justifyContent: 'space-between', padding: 10 },
+  profileImage: { width: 40, height: 40, borderRadius: 20 },
+  companyLogo: { height: 40, width: 120 },
+  headerIcons: { flexDirection: 'row', alignItems: 'center' },
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: 'red',
+    borderRadius: 8,
+    padding: 4,
   },
   centeredView: {
     flex: 1,
@@ -114,6 +110,7 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
   },
+  cartCountText: { color: '#fff', fontSize: 12 },
 });
 
 export default Header;

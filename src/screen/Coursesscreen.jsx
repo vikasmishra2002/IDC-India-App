@@ -3,7 +3,6 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, ScrollView
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Updated import for icons
 import Header from '../Header'; // Import the Header component
 import Footer from '../Footer'; // Import the Footer component
-import { authAxios } from '../services/axios'; // Import axios configuration
 import { withoutAuthAxios } from '../services/config';
 
 const { width } = Dimensions.get('window');
@@ -49,8 +48,9 @@ const Coursesscreen = ({ navigation }) => {
     }
   };
 
+  // Add this function here
   const handleCourseClick = (course) => {
-    navigation.navigate('CourseDetail', { course }); // Navigate to a course detail screen
+    navigation.navigate('CourseDetail', { course }); // Navigate to the course detail screen
   };
 
   const currentTextColor = theme === 'dark' ? '#fff' : '#000';
@@ -77,7 +77,7 @@ const Coursesscreen = ({ navigation }) => {
           <TouchableOpacity
             key={course._id}
             style={[styles.card, { backgroundColor: course.backgroundColor || '#E6E6FA' }]} // Default color if not provided
-            onPress={() => handleCourseClick(course)}
+            onPress={() => handleCourseClick(course)} // Call handleCourseClick when a course is clicked
           >
             <View style={styles.leftContainer}>
               <Text style={[styles.courseTitle, { color: currentTextColor }]}>{course.courseName}</Text>

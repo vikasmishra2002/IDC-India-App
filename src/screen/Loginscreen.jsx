@@ -40,7 +40,7 @@ const LoginScreen = () => {
   }, []);
 
   const handleGoBack = () => {
-    navigation.goBack();
+    navigation.goBack("HOME");
   };
 
   const handleSignup = () => {

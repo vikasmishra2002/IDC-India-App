@@ -22,12 +22,13 @@ const authSlice = createSlice({
     },
     setToken(state, action) {
       state.token = action.payload;
+      state.isAuthenticated = true; // Set authenticated flag when token is set
       AsyncStorage.setItem('token', JSON.stringify(action.payload)); 
     },
     rehydrate(state, action) {
-      if (action.payload) {  // Ensure payload is not null or undefined
+      if (action.payload) {
         state.token = action.payload.token;
-        state.isAuthenticated = !!action.payload.token;
+        state.isAuthenticated = !!action.payload.token; // Set true if token exists
         state.user = action.payload.user || null;
         state.profileImage = action.payload.profileImage || null;
       }
@@ -38,8 +39,8 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.user = null;
-      AsyncStorage.removeItem('token'); 
       state.profileImage = null; 
+      AsyncStorage.removeItem('token'); // Clear token from storage
     },
     login(state, action) {
       state.isAuthenticated = true;
@@ -48,16 +49,15 @@ const authSlice = createSlice({
       state.profileImage = action.payload.profileImage || null;
       AsyncStorage.setItem('token', JSON.stringify(action.payload.token));
     },
-    // New setUser reducer to update user data
     setUser(state, action) {
       state.user = action.payload;
       state.profileImage = action.payload.profileImage || state.profileImage;
     },
     setProfileImage(state, action) {
-      state.profileImage = action.payload; // Set profileImage independently
+      state.profileImage = action.payload;
     },
   },
 });
 
-export const { setSignupData, setLoading, setToken, rehydrate, logout, login, setUser } = authSlice.actions;
+export const { setSignupData, setLoading, setToken, rehydrate, logout, login, setUser, setProfileImage } = authSlice.actions;
 export default authSlice.reducer;
