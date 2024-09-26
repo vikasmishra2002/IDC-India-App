@@ -13,6 +13,8 @@ import Otpverification from './screen/Otpverification';
 import Forgetpassword from './screen/Forgetpassword';
 import CourseDetail from './screen/CourseDetail'
 import CartPage from './screen/CartPage';
+import EditProfileScreen from './screen/EditProfileScreen';
+import Enrolled from './screen/EnrolledCourses'
 const Stack = createNativeStackNavigator();
 
 const MainNavigator = () => {
@@ -20,9 +22,7 @@ const MainNavigator = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
-    // Set the loaded state to true when the app is ready
     const checkAuthentication = async () => {
-      // Simulate a delay for rehydration (you can add actual rehydration check here if needed)
       setTimeout(() => {
         setIsLoaded(true);
       }, 500);
@@ -32,7 +32,7 @@ const MainNavigator = () => {
 
   if (!isLoaded) {
     
-    return null; // Or a loading component
+    return null; 
   }
 
   return (
@@ -45,13 +45,15 @@ const MainNavigator = () => {
         <Stack.Screen name="LOGIN" component={Loginscreen} />
         <Stack.Screen name="SIGNIN" component={SignupScreen} />
         <Stack.Screen name="HOMESCREENMAIN" component={Homescreenmain} />
-        <Stack.Screen name="OTPVERIFY" component={Otpverification} />
+        <Stack.Screen name="Otpverify" component={Otpverification} />
         <Stack.Screen name="FORGETPASS" component={Forgetpassword} />
         <Stack.Screen name="COURSES" component={Coursesscreen} />
         <Stack.Screen name="DASHBOARD" component={Dashboard} />
         <Stack.Screen name="PAYMENTS" component={Payments} />
         <Stack.Screen name="CourseDetail" component={CourseDetail}/>
         <Stack.Screen name="cartpage" component={CartPage}/>
+        <Stack.Screen name="editprofile" component={EditProfileScreen}/>
+        <Stack.Screen name="enrollCourses" component={Enrolled}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -4,14 +4,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { authAxios } from '../services/config'; // Adjust the path accordingly
-import Header from '../Header'; // Import Header component
-import Footer from '../Footer'; // Import Footer component
+import { authAxios } from '../services/config'; 
+import Header from '../Header'; 
+import Footer from '../Footer'; 
 import FormData from 'form-data';
-
 
 const Dashboard = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [theme, setTheme] = useState(Appearance.getColorScheme());
   const [activeIcon, setActiveIcon] = useState('info');
   const [expandedSection, setExpandedSection] = useState(null);
@@ -21,7 +21,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigation = useNavigation();
-console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
+  
+
   useEffect(() => {
     const themeListener = Appearance.addChangeListener(({ colorScheme }) => {
       setTheme(colorScheme);
@@ -32,22 +33,36 @@ console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
 
   useFocusEffect(
     useCallback(() => {
-      setActiveIcon('info'); 
-      fetchUserDetails(); // Fetch user details when focused
+      setActiveIcon('info');
+      fetchUserDetails(); 
     }, [])
   );
 
-  
+  const fetchEnrolledCourses = async () => {
+    try {
+      setLoading(true);
 
+      const response = await authAxios().get('/profile/getEnrolledCourses');
+      console.log(response.data.data, "responseresponseresponseresponse")
+  
+      if (response.data.success) {
+        setEnrolledCourses(response.data.data);
+      } else {
+        throw new Error(response.data.message);
+      }
+    } catch (error) {
+      setError("Could not fetch enrolled courses.");
+    } finally {
+      setLoading(false);
+    }
+  };
   const fetchUserDetails = async () => {
     try {
       const response = await authAxios().get('/profile/getUserDetails');
-      console.log(response.data, "User data fetched");
-      setUserData(response.data.data); // Access the data property from the response
+      setUserData(response.data.data);
       setProfileImage({ uri: response.data.data.image });
     } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Failed to fetch user details.');
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -63,19 +78,8 @@ console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
         permissionResult = await request(PERMISSIONS.IOS.PHOTO_LIBRARY);
       }
 
-      if (permissionResult === RESULTS.GRANTED) {
-        if (Platform.OS === 'android') {
-          ToastAndroid.show('Thank you for giving permission', ToastAndroid.SHORT);
-        }
-        return true;
-      } else {
-        if (Platform.OS === 'android') {
-          ToastAndroid.show('To upload an image, please give permission', ToastAndroid.SHORT);
-        }
-        return false;
-      }
+      return permissionResult === RESULTS.GRANTED;
     } catch (err) {
-      console.warn(err);
       return false;
     }
   };
@@ -85,18 +89,9 @@ console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
   
     if (permissionGranted) {
       launchImageLibrary({}, async (response) => {
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.error) {
-          console.log('ImagePicker Error: ', response.error);
-          Alert.alert('Error', 'Failed to pick an image.');
-        } else if (response.assets && response.assets.length > 0) {
+        if (response.assets && response.assets.length > 0) {
           const selectedImage = response.assets[0];
-          const source = { uri: selectedImage.uri };
-          setProfileImage(source);
-          setImageModalVisible(false); // Close modal after selecting an image
-          
-          // Call function to upload the image
+          setProfileImage({ uri: selectedImage.uri });
           await updateProfileImage(selectedImage);
         }
       });
@@ -104,62 +99,71 @@ console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
   };
 
   const updateProfileImage = async (image) => {
-    console.log(image, "imageeeeeeee");
-  
     const formData = new FormData();
     formData.append('displayPicture', {
       uri: image.uri,
       type: image.type || 'image/jpeg',
       name: image.fileName || 'photo.jpg',
     });
-    console.log(formData, "formDataformData");
-  
+
     try {
       const response = await authAxios().put('/profile/updateDisplayPicture', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-  
-      console.log(response.data, "responseresponseresponse");
-  
+
       if (response.data.success) {
-        // Update profileImage with the new image URL
         setProfileImage({ uri: response.data.data.image });
-        // Update userData with the new data
         setUserData(response.data.data);
         ToastAndroid.show('Image updated successfully', ToastAndroid.SHORT);
       } else {
         ToastAndroid.show('Failed to update image', ToastAndroid.SHORT);
       }
     } catch (error) {
-      console.error('Error updating image:', error);
       ToastAndroid.show('Failed to update image', ToastAndroid.SHORT);
     }
   };
-  
-  
+
   const removeImage = () => {
     setProfileImage(null);
-    setImageModalVisible(false); // Close modal after removing the image
+    setImageModalVisible(false); 
+  };
+
+  const handleProfileUpdated = () => {
+    fetchUserDetails(); 
+    ToastAndroid.show('Profile updated successfully', ToastAndroid.SHORT);
   };
 
   const handleEditProfile = () => {
-    navigation.navigate('EditProfile');
+    navigation.navigate('editprofile', {
+      onProfileUpdated: handleProfileUpdated, 
+    });
   };
+
+  const handleenrolled = () => {
+    navigation.navigate('enrollCourses')
+  }
 
   const handleIconPress = (iconName) => {
     setActiveIcon(iconName);
-    navigation.navigate(iconName.charAt(0).toUpperCase() + iconName.slice(1)); // Ensure correct route name
+    navigation.navigate(iconName.charAt(0).toUpperCase() + iconName.slice(1)); 
   };
 
   const toggleExpand = (section) => {
+    if (section === 'enrolledCourses' && !enrolledCourses.length) {
+      fetchEnrolledCourses(); 
+    }
     setExpandedSection(expandedSection === section ? null : section);
   };
+  
 
-  const currentTextColor = theme === 'dark' ? '#fff' : '#000';
-  const currentBackgroundColor = theme === 'dark' ? '#121212' : '#f8f8f8';
-  const activeColor = '#007AFF'; // Blue color for active icons
+  
+  
+
+  const currentTextColor = theme === 'dark' ? '#433E39' : '#433E39'; 
+  const currentBackgroundColor = theme === 'dark' ? '#d9d9d9' : '#d9d9d0'; 
+  const activeColor = '#007AFF'; 
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -171,13 +175,9 @@ console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
 
   return (
     <View style={[styles.container, { backgroundColor: currentBackgroundColor }]}>
-      {/* Header */}
       <Header profileImage={profileImage?.uri} onProfilePress={() => setImageModalVisible(true)} />
-        {console.log(profileImage, "below header")}
 
-      {/* Main Content */}
       <View style={{ flex: 1 }}>
-        {/* Image Modal */}
         <Modal
           animationType="fade"
           transparent={true}
@@ -200,15 +200,13 @@ console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
           </Pressable>
         </Modal>
 
-        {/* User Information Card */}
         <View style={styles.userCard}>
           <TouchableOpacity style={styles.userImagePlaceholder} onPress={openGallery}>
-            {console.log(userData, "userDtaa")}
             {profileImage || userData?.image ? (
               <Image
-              source={{ uri: profileImage?.uri || userData?.image }}
-              style={styles.profileImage}
-            />
+                source={{ uri: profileImage?.uri || userData?.image }}
+                style={styles.profileImage}
+              />
             ) : (
               <Ionicons name="camera-outline" size={54} color={currentTextColor} />
             )}
@@ -223,76 +221,97 @@ console.log(profileImage, "profileImageprofileImageprofileImageuseNavigation")
           </View>
         </View>
 
-        {/* Expandable Cards */}
         <ScrollView style={styles.mainContent}>
-          {/* My Profile */}
-          <TouchableOpacity style={styles.card} onPress={() => toggleExpand('profile')}>
-            <Text style={styles.cardTitle}>My Profile</Text>
-            <Ionicons
-              name={expandedSection === 'profile' ? 'chevron-up-outline' : 'chevron-down-outline'}
-              size={20}
-              color={currentTextColor}
-            />
-          </TouchableOpacity>
-          {expandedSection === 'profile' && (
-            <View style={styles.cardContent}>
-              <Text>Name: {userData ? `${userData.firstName} ${userData.lastName}` : 'Loading...'}</Text>
-              <Text>Mobile Number: {userData && userData.additionalDetails ? userData.additionalDetails.contactNumber : 'Loading...'}</Text>
-              <Text>Email: {userData ? userData.email : 'Loading...'}</Text>
-              <Text>Date of Birth: {userData && userData.additionalDetails ? userData.additionalDetails.dateOfBirth : 'Loading...'}</Text>
-              <Text>Gender: {userData && userData.additionalDetails ? userData.additionalDetails.gender : 'Loading...'}</Text>
-              <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
-                <Text style={styles.editText}>Edit</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+        <TouchableOpacity style={styles.card} onPress={() => toggleExpand('profile')}>
+  <Text style={styles.cardTitle}>My Profile</Text>
+  <Ionicons
+    name={expandedSection === 'profile' ? 'chevron-up-outline' : 'chevron-down-outline'}
+    size={20}
+    color={currentTextColor}
+  />
+</TouchableOpacity>
+{expandedSection === 'profile' && (
+  <View style={styles.cardContent}>
+    <View style={styles.table}>
+      <View style={styles.tableHeader}>
+        <Text style={styles.tableHeaderText}>Field</Text>
+        <Text style={styles.tableHeaderText}>Details</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>Name</Text>
+        <Text style={styles.tableCell}>{userData ? `${userData.firstName} ${userData.lastName}` : 'Loading...'}</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>Mobile Number</Text>
+        <Text style={styles.tableCell}>{userData && userData.additionalDetails ? userData.additionalDetails.contactNumber : 'Loading...'}</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>Email</Text>
+        <Text style={styles.tableCell}>{userData ? userData.email : 'Loading...'}</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>Date of Birth</Text>
+        <Text style={styles.tableCell}>{userData && userData.additionalDetails ? userData.additionalDetails.dateOfBirth : 'Loading...'}</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>Gender</Text>
+        <Text style={styles.tableCell}>{userData && userData.additionalDetails ? userData.additionalDetails.gender : 'Loading...'}</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>About</Text>
+        <Text style={styles.tableCell}>{userData && userData.additionalDetails ? userData.additionalDetails.about : 'Loading...'}</Text>
+      </View>
+    </View>
+    <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
+      <Text style={styles.editText}>Edit</Text>
+    </TouchableOpacity>
+  </View>
+)}
 
-          {/* Enrolled Courses */}
-          <TouchableOpacity style={styles.card} onPress={() => toggleExpand('courses')}>
-            <Text style={styles.cardTitle}>Enrolled Courses</Text>
-            <Ionicons
-              name={expandedSection === 'courses' ? 'chevron-up-outline' : 'chevron-down-outline'}
-              size={20}
-              color={currentTextColor}
-            />
+
+<TouchableOpacity style={styles.card} onPress={() => toggleExpand('enrolledCourses')}>
+  <Text style={styles.cardTitle}>Enrolled Courses</Text>
+  <Ionicons
+    name={expandedSection === 'enrolledCourses' ? 'chevron-up-outline' : 'chevron-down-outline'}
+    size={20}
+    color={currentTextColor}
+  />
+</TouchableOpacity>
+{expandedSection === 'enrolledCourses' && (
+  <View style={styles.cardContent}>
+    {enrolledCourses.length > 0 ? (
+      <View style={styles.table}>
+        <View style={styles.tableHeader}>
+          <Text style={styles.tableHeaderText}>S.No.</Text>
+          <Text style={styles.tableHeaderText}>Course Name</Text>
+          <Text style={styles.tableHeaderText}>Duration</Text>
+          <Text style={styles.tableHeaderText}>Progress (%)</Text>
+        </View>
+        {enrolledCourses.map((course, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.tableRow}
+            onPress={() => handleenrolled()} 
+          >
+            <Text style={styles.tableCell}>{index + 1}</Text>
+            <Image source={{ uri: course.thumbnail || 'default_image_url' }} style={styles.courseImage} />
+            <Text style={styles.tableCell}>{course.courseName}</Text>
+            <Text style={styles.tableCell}>{course.totalDuration || 'N/A'}</Text>
+            <Text style={styles.tableCell}>{course.progressPercentage || 0}%</Text>
           </TouchableOpacity>
-          {expandedSection === 'courses' && (
-            <View style={styles.cardContent}>
-              <ScrollView>
-                <View style={styles.table}>
-                  <View style={styles.tableHeader}>
-                    <Text style={styles.tableHeaderText}>Course Name</Text>
-                    <Text style={styles.tableHeaderText}>Duration</Text>
-                    <Text style={styles.tableHeaderText}>Progress</Text>
-                  </View>
-                  {/* Replace with dynamic course data */}
-                  {userData && userData.courses.map((courseId, index) => (
-                    <View key={index} style={styles.tableRow}>
-                      <View style={styles.courseImageContainer}>
-                        <Image source={{ uri: 'course_image_url_here' }} style={styles.courseImage} />
-                      </View>
-                      <View style={styles.tableCell}>
-                        <Text>{`Course ${index + 1}`}</Text> {/* Adjust this to use real course data */}
-                      </View>
-                      <View style={styles.tableCell}>
-                        <Text>Duration</Text> {/* Adjust this to use real course data */}
-                      </View>
-                      <View style={styles.tableCell}>
-                        <View style={styles.progressBarBackground}>
-                          <View style={[styles.progressBarFill, { width: '50%' }]} /> {/* Adjust this to use real course data */}
-                          <Text style={styles.progressText}>50%</Text> {/* Adjust this to use real course data */}
-                        </View>
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-          )}
+        ))}
+      </View>
+    ) : (
+      <Text>No enrolled courses available.</Text>
+    )}
+  </View>
+)}
+
+
+
         </ScrollView>
       </View>
 
-      {/* Footer */}
       <Footer activeIcon={activeIcon} onIconPress={handleIconPress} />
     </View>
   );
@@ -311,7 +330,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: 20,
     padding: 35,
     alignItems: 'center',
@@ -328,13 +347,27 @@ const styles = StyleSheet.create({
     padding: 10,
     width: '100%',
     alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#007AFF',
+    marginVertical: 5,
   },
   modalText: {
     fontSize: 18,
+    color: '#fff',
   },
   userCard: {
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   userImagePlaceholder: {
     width: 120,
@@ -355,7 +388,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
@@ -368,6 +401,17 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardTitle: {
     fontSize: 18,
@@ -376,6 +420,8 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 20,
     backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    marginTop: 10,
   },
   editButton: {
     marginTop: 10,
@@ -442,6 +488,47 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
+  },
+  noCoursesText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#666',
+  },
+  table: {
+    marginTop: 10,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#007AFF',
+    padding: 10,
+  },
+  tableHeaderText: {
+    flex: 1,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    alignItems: 'center',
+  },
+  tableCell: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  courseImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 5,
+    marginRight: 10,
   },
 });
 

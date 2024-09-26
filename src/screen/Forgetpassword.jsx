@@ -10,15 +10,12 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-toast-message';
-import { sendResetLink } from '../services/authApi'; // Ensure this function is implemented
+import { sendResetLink } from '../services/authApi';
 
-
-const Forgetpassword = ({ navigation }) => {
+const ForgetPassword = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [isLinkSent, setIsLinkSent] = useState(false);
-  const handleSignup = () => {
-    navigation.navigate('SIGNIN');
-  };
+
   const handleSendResetLink = async () => {
     if (!email) {
       Toast.show({
@@ -71,121 +68,114 @@ const Forgetpassword = ({ navigation }) => {
     }
   };
 
+  const handleSignin = () => {
+    navigation.goBack();
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Header with Back Button and Logo */}
       <View style={styles.header}>
         <Image
-          source={require('../images/idclogo.png')} // Replace with your logo path
+          source={require('../images/idclogo.png')} // Replace with your company logo
           style={styles.logo}
         />
       </View>
-      
-      {/* Image */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={require('../images/otpimage.png')} // Replace with your image path
-          style={styles.image}
-        />
-      </View>
-      
+
       {/* Title */}
-      <Text style={styles.title}>Forget Password</Text>
-      
+      <Text style={styles.title}>Forgot Password?</Text>
+
       {/* Subtitle */}
       <Text style={styles.subtitle}>
-      Have no fear. We'll email you instructions to reset your password. If you dont have access to your email we can try account recovery
+        Enter your registered email address below to receive password reset instructions.
       </Text>
-      
+
       {/* Email Input */}
       <TextInput
         style={styles.input}
-        placeholder="Enter your email"
+        placeholder="e.g. john@example.com"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
+        autoCapitalize="none"
       />
-      
+
       {/* Send Reset Link Button */}
       <TouchableOpacity style={styles.button} onPress={handleSendResetLink}>
-        <Text style={styles.buttonText}>Send Reset Link</Text>
+        <Text style={styles.buttonText}>Reset Password</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.footerButton} onPress={handleSignup}>
-          <Ionicons name="arrow-back-outline" size={20} color="red" />
-          <Text style={styles.footerText}>Back To Signup</Text>
-        </TouchableOpacity>
 
       {/* Open Gmail Button */}
       {isLinkSent && (
         <TouchableOpacity
-          style={styles.openGmailButton}
+          style={styles.gmailButton}
           onPress={() => Linking.openURL('https://mail.google.com')}
         >
           <Ionicons name="mail-outline" size={20} color="white" />
-          <Text style={styles.openGmailText}>
-            Open Gmail
-            </Text>
+          <Text style={styles.gmailButtonText}>Open Gmail</Text>
         </TouchableOpacity>
       )}
+
+      {/* Footer: Back to Sign In */}
+      <TouchableOpacity style={styles.footerButton} onPress={handleSignin}>
+        <Ionicons name="arrow-back-outline" size={20} color="red" />
+        <Text style={styles.footerText}>Back to Log In</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
-export default Forgetpassword;
+export default ForgetPassword;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex:0.5,
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
   },
   header: {
     width: '100%',
-    height: 64,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 30,
   },
   logo: {
-    width: 100,
-    height: 40,
+    width: 120,
+    height: 50,
     resizeMode: 'contain',
   },
-  imageContainer: {
-    borderWidth: 2,
-    borderColor: 'black',
-    padding: 25,
-    height: 300,
-    marginBottom: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  backButton: {
+    padding: 5,
   },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
+  
   title: {
-    fontSize: 32,
-    color: 'red',
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 10,
   },
   subtitle: {
     fontSize: 14,
-    marginBottom: 20,
+    color: '#777',
+    textAlign: 'center',
+    marginBottom: 30,
   },
   input: {
-    height: 40,
-    borderColor: 'black',
+    height: 50,
     borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
     paddingHorizontal: 10,
+    fontSize: 16,
     marginBottom: 20,
   },
   button: {
     backgroundColor: 'red',
+    paddingVertical: 12,
     borderRadius: 5,
-    paddingVertical: 10,
     alignItems: 'center',
     marginBottom: 20,
   },
@@ -194,17 +184,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  openGmailButton: {
-    backgroundColor: '#d44638', // Gmail color
+  gmailButton: {
+    backgroundColor: '#d44638',
+    paddingVertical: 12,
     borderRadius: 5,
-    paddingVertical: 10,
-    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  openGmailText: {
+  gmailButtonText: {
     color: 'white',
     fontSize: 16,
+    marginLeft: 8,
+  },
+  footerButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 14,
+    color: 'red',
     marginLeft: 5,
   },
 });

@@ -22,13 +22,13 @@ const authSlice = createSlice({
     },
     setToken(state, action) {
       state.token = action.payload;
-      state.isAuthenticated = true; // Set authenticated flag when token is set
+      state.isAuthenticated = true;
       AsyncStorage.setItem('token', JSON.stringify(action.payload)); 
     },
     rehydrate(state, action) {
       if (action.payload) {
         state.token = action.payload.token;
-        state.isAuthenticated = !!action.payload.token; // Set true if token exists
+        state.isAuthenticated = !!action.payload.token; 
         state.user = action.payload.user || null;
         state.profileImage = action.payload.profileImage || null;
       }
@@ -40,7 +40,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.user = null;
       state.profileImage = null; 
-      AsyncStorage.removeItem('token'); // Clear token from storage
+      AsyncStorage.removeItem('token'); 
     },
     login(state, action) {
       state.isAuthenticated = true;

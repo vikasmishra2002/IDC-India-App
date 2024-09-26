@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  items: [], // List of courses added to the cart
+  items: [],
 };
 
 const cartSlice = createSlice({
@@ -10,15 +10,18 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action) => {
       const course = action.payload;
-      // Check if the course is already in the cart
       const alreadyInCart = state.items.find(item => item._id === course._id); 
       
       if (!alreadyInCart) {
-        state.items.push(course); // Add course to the cart only if it's not already there
+        state.items.push(course);
       }
+    },
+    removeFromCart: (state, action) => {
+      const courseId = action.payload;
+      state.items = state.items.filter(item => item._id !== courseId);
     },
   },
 });
 
-export const { addToCart } = cartSlice.actions;
+export const { addToCart, removeFromCart } = cartSlice.actions;
 export default cartSlice.reducer;

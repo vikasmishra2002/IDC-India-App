@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator, Dimensions } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { withoutAuthAxios } from '../services/config';
+import { authAxios } from '../services/config'; 
 import { addToCart } from '../Redux/Reducers/cartSlice';
 import Header from '../Header';
 import Footer from '../Footer';
@@ -21,7 +21,7 @@ const CourseDetail = ({ navigation }) => {
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const response = await withoutAuthAxios().post('/course/getFullCourseDetails', { courseId: course._id });
+        const response = await authAxios().post('/course/getFullCourseDetails', { courseId: course._id });
         if (response.data.success) {
           setCourseDetails(response.data.data.courseDetails);
         } else {
@@ -29,7 +29,7 @@ const CourseDetail = ({ navigation }) => {
         }
       } catch (err) {
         setError('An error occurred while fetching course details');
-        console.log(err);
+        console.log('Fetch error:', err); 
       } finally {
         setLoading(false);
       }

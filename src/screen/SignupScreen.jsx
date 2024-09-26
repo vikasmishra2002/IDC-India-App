@@ -13,10 +13,10 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import { useNavigation } from '@react-navigation/native';
-import { colors } from '../colors';
+import { colors } from '../colors'; // Import the colors
 import { fonts } from './fonts';
 import Toast from 'react-native-toast-message';
-import { sendOtp, signUp } from '../services/authApi';
+import { sendOtp } from '../services/authApi';
 import { useDispatch } from 'react-redux';
 import { setSignupData } from '../Redux/Reducers/authSlice';
 
@@ -73,20 +73,23 @@ const SignupScreen = () => {
     setAccountType('Student');
   };
 
-  const currentTextColor = theme === 'dark' ? '#fff' : '#000';
+  const currentTextColor = theme === 'dark' ? colors.white : colors.black;
   const placeholderTextColor = theme === 'dark' ? '#ccc' : '#666';
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {loading && (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={colors.primaryRed} />
           <Text style={styles.loaderText}>Processing...</Text>
         </View>
       )}
       <TouchableOpacity style={styles.backButtonWrapper} onPress={() => navigation.goBack()}>
-        <Ionicons name={"arrow-back-outline"} color={colors.primary} size={25} />
+        <Ionicons name={"arrow-back-outline"} color={colors.primaryRed} size={25} />
       </TouchableOpacity>
+      <View style={styles.logoContainer}>
+        <Image source={require('../images/idclogo.png')} style={styles.logo} />
+      </View>
       <View style={styles.textContainer}>
         <Text style={[styles.headingText, { color: currentTextColor }]}>Register!</Text>
         <Text style={[styles.headingText1, { color: currentTextColor }]}>Enter your Personal Details.</Text>
@@ -155,13 +158,14 @@ const SignupScreen = () => {
           <Text style={styles.registerText}>Register</Text>
         </TouchableOpacity>
         <Text style={[styles.continueText, { color: currentTextColor }]}>or </Text>
-        <TouchableOpacity style={[styles.googleButtonContainer, { backgroundColor: '#d9d9d9' }]} onPress={() => {/* Handle Google Sign-In */}}>
+        <TouchableOpacity style={[styles.googleButtonContainer, { backgroundColor: colors.primaryGray }]} onPress={() => {/* Handle Google Sign-In */}}>
           <Image source={require("../images/Google.png")} style={styles.googleImage} />
+          <Text style={styles.googleText}>Sign in with Google</Text>
         </TouchableOpacity>
         <View style={styles.footerContainer}>
           <Text style={[styles.accountText, { color: currentTextColor }]}>Already have an account!</Text>
           <TouchableOpacity onPress={() => navigation.navigate('LOGIN')}>
-            <Text style={[styles.signupText, { color: colors.primary }]}>  Login</Text>
+            <Text style={[styles.signupText, { color: colors.primaryRed }]}> Login</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -174,27 +178,41 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.white, // Using primary gray
   },
   backButtonWrapper: {
     height: 40,
     width: 40,
-    backgroundColor: colors.gray,
+    backgroundColor: colors.primaryWhite, // Using primary white
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
+    position: 'absolute', // Position it in the header
+    top: 20,
+    left: 20,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginVertical: 1,
+    marginTop: 1, // Adjust to align with the back button
+  },
+  logo: {
+    marginBottom: 10,
+    width: 120, // Increased size
+    height: 50,
+    resizeMode: 'contain',
   },
   textContainer: {
     marginVertical: 20,
   },
   headingText: {
     fontSize: 32,
-    color: colors.primary,
+    color: colors.primaryRed, // Using primary red
     fontFamily: fonts.SemiBold,
   },
   headingText1: {
     fontSize: 18,
-    color: colors.red,
+    color: colors.primaryRed, // Using primary red
     fontFamily: fonts.SemiBold,
   },
   formContainer: {
@@ -202,7 +220,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1,
-    borderColor: colors.secondary,
+    borderColor: colors.primaryRed, // Using primary red
     borderRadius: 100,
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -216,7 +234,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.Light,
   },
   registerButton: {
-    backgroundColor: '#ff5733',
+    backgroundColor: colors.primaryRed, // Using primary red
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
@@ -226,23 +244,23 @@ const styles = StyleSheet.create({
   registerText: {
     fontSize: 16,
     fontFamily: fonts.Regular,
-    color: '#fff',
+    color: colors.primaryWhite, // Using primary white
   },
   googleButtonContainer: {
     flexDirection: 'row',
     borderWidth: 2,
-    borderColor: '#ff5733',
+    borderColor: colors.primaryRed, // Using primary red
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
     gap: 10,
-    marginTop: 1,
+    marginTop: 2,
+    backgroundColor: colors.primaryGray, // Using primary gray
   },
-  googleImage: {
-    height: 20,
-    width: 20,
-    marginRight: 10,
+  googleText: {
+    color: colors.primaryRed, // Using primary red
+    fontFamily: fonts.Regular,
   },
   continueText: {
     textAlign: "center",
@@ -254,7 +272,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   accountText: {
     fontSize: 14,

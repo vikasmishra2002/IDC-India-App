@@ -46,7 +46,7 @@ const Header = ({ profileImage }) => {
       <Image source={require('./images/idclogo.png')} style={styles.companyLogo} />
 
       <View style={styles.headerIcons}>
-        <TouchableOpacity onPress={() => navigation.navigate('CartPage')}>
+        <TouchableOpacity onPress={() => navigation.navigate('cartpage')}>
           <Ionicons name="cart-outline" size={24} color="#333" />
           {cartCount > 0 && (
             <View style={styles.cartBadge}>

@@ -16,7 +16,7 @@ const OtpVerificationScreen = () => {
 
   useEffect(() => {
     if (!signupData) {
-      navigation.navigate('Signup');
+      navigation.navigate('HOMESCREENMAIN');
     }
   }, [signupData, navigation]);
 
@@ -47,16 +47,8 @@ const OtpVerificationScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={require('../images/idclogo.png')}
+          source={require('../images/idclogo.png')} // Replace with your actual company logo path
           style={styles.logo}
-        />
-      </View>
-
-      {/* Image */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={require('../images/otpimage.png')}
-          style={styles.image}
         />
       </View>
 
@@ -113,63 +105,50 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#f5f5f5', // Slightly off-white for a softer look
   },
   header: {
     width: '100%',
-    height: 64,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 30,
   },
   logo: {
-    width: 100,
-    height: 40,
-    resizeMode: 'contain',
-  },
-  imageContainer: {
-    borderWidth: 2,
-    borderColor: 'black',
-    padding: 25,
-    height: 300,
-    marginBottom: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
+    width: 120,
+    height: 50,
     resizeMode: 'contain',
   },
   title: {
-    fontSize: 32,
-    color: 'red',
+    fontSize: 28,
+    color: '#333', // Darker color for better readability
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 14,
-    marginBottom: 10,
+    fontSize: 16,
+    color: '#666', // Lighter color for subtitle
+    marginBottom: 20,
   },
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   otpBox: {
-    width: 40,
-    height: 40,
-    borderColor: 'black',
+    width: 50,
+    height: 50,
+    borderColor: '#ddd',
     borderWidth: 1,
     textAlign: 'center',
-    fontSize: 18,
-    color: 'black',
-    backgroundColor: 'white',
+    fontSize: 20,
+    color: '#333',
+    backgroundColor: '#fff',
   },
   verifyButton: {
     backgroundColor: 'red',
     borderRadius: 5,
-    paddingVertical: 10,
+    paddingVertical: 12,
     alignItems: 'center',
     marginBottom: 20,
     flexDirection: 'row',
@@ -177,7 +156,7 @@ const styles = StyleSheet.create({
   },
   verifyButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   footer: {
